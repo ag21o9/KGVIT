@@ -10,6 +10,9 @@ import coursesRouter from './routes/courses.js'
 import facultyRouter from './routes/faculty.js'
 import eventsRouter from './routes/events.js'
 import achievementsRouter from './routes/achievements.js'
+import noticesRouter from './routes/notices.js'
+import placementRouter from './routes/placement.js'
+import resourcesRouter from './routes/resouces.js'
 
 dotenv.config();
 
@@ -32,6 +35,9 @@ app.use('/api/v1', coursesRouter);
 app.use('/api/v1', facultyRouter);
 app.use('/api/v1', eventsRouter);
 app.use('/api/v1', achievementsRouter);
+app.use('/api/v1', noticesRouter);
+app.use('/api/v1', placementRouter);
+app.use('/api/v1', resourcesRouter);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
