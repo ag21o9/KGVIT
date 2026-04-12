@@ -7,6 +7,7 @@ import userManagementRouter from './routes/users.js'
 import sliderFacilityRouter from './routes/sliders.js'
 import postsRouter from './routes/posts.js'
 import coursesRouter from './routes/courses.js'
+import facultyRouter from './routes/faculty.js'
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use('/api/v1', userManagementRouter);
 app.use('/api/v1', sliderFacilityRouter);
 app.use('/api/v1', postsRouter);
 app.use('/api/v1', coursesRouter);
+app.use('/api/v1', facultyRouter);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
