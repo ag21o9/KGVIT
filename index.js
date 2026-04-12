@@ -13,6 +13,9 @@ import achievementsRouter from './routes/achievements.js'
 import noticesRouter from './routes/notices.js'
 import placementRouter from './routes/placement.js'
 import resourcesRouter from './routes/resouces.js'
+import inquiryRouter from './routes/inquiry.js'
+import settingsRouter from './routes/settings.js'
+import leadsRouter from './routes/leads.js'
 
 dotenv.config();
 
@@ -27,17 +30,20 @@ app.get("/", async (req, res) => {
     res.json({ message: "Server is running" });
 });
 
-app.use('/api/v1', router);
-app.use('/api/v1', userManagementRouter);
-app.use('/api/v1', sliderFacilityRouter);
-app.use('/api/v1', postsRouter);
-app.use('/api/v1', coursesRouter);
-app.use('/api/v1', facultyRouter);
-app.use('/api/v1', eventsRouter);
-app.use('/api/v1', achievementsRouter);
-app.use('/api/v1', noticesRouter);
-app.use('/api/v1', placementRouter);
-app.use('/api/v1', resourcesRouter);
+app.use('/api/v1/main', router);
+app.use('/api/v1/um', userManagementRouter);
+app.use('/api/v1/sf', sliderFacilityRouter);
+app.use('/api/v1/ps', postsRouter);
+app.use('/api/v1/cr', coursesRouter);
+app.use('/api/v1/fr', facultyRouter);
+app.use('/api/v1/er', eventsRouter);
+app.use('/api/v1/ar', achievementsRouter);
+app.use('/api/v1/nr', noticesRouter);
+app.use('/api/v1/pr', placementRouter);
+app.use('/api/v1/rr', resourcesRouter);
+app.use('/api/v1/ir', inquiryRouter);
+app.use('/api/v1/sr', settingsRouter);
+app.use('/api/v1/lr', leadsRouter);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
