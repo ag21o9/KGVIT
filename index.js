@@ -8,6 +8,8 @@ import sliderFacilityRouter from './routes/sliders.js'
 import postsRouter from './routes/posts.js'
 import coursesRouter from './routes/courses.js'
 import facultyRouter from './routes/faculty.js'
+import eventsRouter from './routes/events.js'
+import achievementsRouter from './routes/achievements.js'
 
 dotenv.config();
 
@@ -28,6 +30,8 @@ app.use('/api/v1', sliderFacilityRouter);
 app.use('/api/v1', postsRouter);
 app.use('/api/v1', coursesRouter);
 app.use('/api/v1', facultyRouter);
+app.use('/api/v1', eventsRouter);
+app.use('/api/v1', achievementsRouter);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
