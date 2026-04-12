@@ -1,0 +1,413 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id       String  @id @default(cuid())
+  name     String
+  image    String?
+  email    String  @unique
+  password String
+  roleId   String
+  role     Role    @relation(fields: [roleId], references: [id])
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  users       User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique // e.g. "VIEW_STUDENTS"
+  description String?
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  id           String @id @default(cuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+}
+
+model Slider {
+  id       String  @id @default(cuid())
+  title    String?
+  caption  String?
+  imageUrl String // stored from Cloudinary / S3
+  linkUrl  String? // optional redirect link
+
+  order    Int     @default(0) // for sorting
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Facility {
+  id       String @id @default(cuid())
+  title    String
+  imageUrl String
+
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id String @id @default(cuid())
+
+  title String
+  slug  String @unique
+
+  excerpt String? // short intro
+  content String // full HTML / editor content
+
+  coverImage String? // uploaded image
+
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+
+  metaTitle       String?
+  metaDescription String?
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  postTags PostTag[]
+}
+
+model Category {
+  id    String @id @default(cuid())
+  name  String
+  posts Post[]
+}
+
+model Tag {
+  id    String    @id @default(cuid())
+  name  String    @unique
+  posts PostTag[]
+}
+
+model PostTag {
+  postId String
+  tagId  String
+
+  post Post @relation(fields: [postId], references: [id])
+  tag  Tag  @relation(fields: [tagId], references: [id])
+
+  @@id([postId, tagId])
+}
+
+model CategoryCourse {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  parentId String?
+  parent   CategoryCourse?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children CategoryCourse[] @relation("CategoryToCategory")
+
+  order Int @default(0)
+
+  courses Course[]
+
+  createdAt DateTime @default(now())
+}
+
+model Course {
+  id String @id @default(cuid())
+
+  title String
+  slug  String @unique
+
+  description String // rich text (HTML)
+
+  duration String? // "4 Years"
+  fee      String? // "₹1,00,000"
+
+  eligibility String? // rich text
+
+  attachments String? // links / notes
+
+  isActive Boolean @default(true)
+
+  categoryId String?
+  category   CategoryCourse? @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id String @id @default(cuid())
+
+  name        String
+  slug        String  @unique
+  description String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  faculties Faculty[]
+}
+
+model Faculty {
+  id String @id @default(cuid())
+
+  name        String
+  email       String? @unique
+  designation String? // Professor, HOD, Lecturer
+
+  qualification String?
+  experience    String? // "5 years", "10+ years"
+
+  bio String? // rich text
+
+  photoUrl String?
+
+  staffType String? // Teaching / Non-Teaching
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  order      Int     @default(0)
+  isFeatured Boolean @default(false)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Event {
+  id String @id @default(cuid())
+
+  title String
+  slug  String @unique
+
+  excerpt     String?
+  description String // rich text (HTML)
+
+  category String? // simple for now (e.g. Cultural, Webinar)
+
+  startAt DateTime
+  endAt   DateTime?
+
+  venue String?
+
+  coverImage String?
+
+  isFeatured Boolean @default(false)
+  isActive   Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Achievement {
+  id String @id @default(cuid())
+
+  title       String
+  description String?
+
+  category AchievementCategory @default(ACADEMIC)
+
+  year Int
+
+  imageUrl String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Placement {
+  id String @id @default(cuid())
+
+  companyName String
+  studentName String
+
+  year Int
+
+  testimonial String? // rich text (HTML)
+
+  companyLogo String?
+
+  order Int @default(0)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notice {
+  id String @id @default(cuid())
+
+  title   String
+  content String // rich text (HTML)
+
+  type NoticeType
+
+  publishedAt DateTime
+  expiresAt   DateTime?
+
+  isArchived Boolean @default(false)
+  isActive   Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Resource {
+  id String @id @default(cuid())
+
+  title   String
+  content String? // optional description (HTML)
+
+  type ResourceType
+
+  fileUrl String? // uploaded file (PDF, DOC, etc.)
+
+  publishedAt DateTime
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Inquiry {
+  id String @id @default(cuid())
+
+  name  String
+  email String?
+  phone String?
+
+  courseInterest String?
+
+  message String?
+
+  documentUrl String?
+
+  status InquiryStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id String @id @default(cuid())
+
+  name  String
+  email String?
+  phone String?
+
+  subject String? // for contact form
+  message String?
+
+  courseInterest String? // for admission form
+
+  documentUrl String? // optional upload
+
+  source String? // "contact-page", "admission-form", etc.
+
+  status LeadStatus @default(PENDING)
+
+  adminNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WebsiteSettings {
+  id String @id @default("global") // singleton
+
+  websiteName String
+  websiteMeta String?
+
+  metaKeywords    String?
+  metaDescription String?
+
+  email          String?
+  phone          String?
+  whatsappNumber String?
+
+  address     String?
+  addressLink String?
+
+  socialLinks Json? // store multiple links
+
+  headerScript String? // analytics, meta scripts
+  footerScript String?
+
+  mapEmbed String?
+
+  logo      String?
+  whiteLogo String?
+  favicon   String?
+
+  updatedAt DateTime @updatedAt
+}
+
+enum LeadStatus {
+  PENDING
+  REVIEWED
+  CONVERTED
+  REJECTED
+}
+
+enum InquiryStatus {
+  PENDING
+  REVIEWED
+  CONVERTED
+  REJECTED
+}
+
+enum ResourceType {
+  TIMETABLE
+  RESULT
+  NOTICE
+  SCHOLARSHIP
+  EXTRACURRICULAR
+  GENERAL
+}
+
+enum NoticeType {
+  EXAM
+  RESULT
+  EVENT
+  GENERAL
+}
+
+enum AchievementCategory {
+  ACADEMIC
+  SPORTS
+  CULTURAL
+}
