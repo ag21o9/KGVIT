@@ -4,6 +4,9 @@ import cors from "cors";
 import { prisma } from './lib/prisma.js'
 import router from './routes/auth.js'
 import userManagementRouter from './routes/users.js'
+import sliderFacilityRouter from './routes/sliders.js'
+import postsRouter from './routes/posts.js'
+import coursesRouter from './routes/courses.js'
 
 dotenv.config();
 
@@ -20,6 +23,9 @@ app.get("/", async (req, res) => {
 
 app.use('/api/v1', router);
 app.use('/api/v1', userManagementRouter);
+app.use('/api/v1', sliderFacilityRouter);
+app.use('/api/v1', postsRouter);
+app.use('/api/v1', coursesRouter);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -34,6 +40,14 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+
+
+
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log('app is running on port', PORT);
+    });
+}
+
+
+export default app;
