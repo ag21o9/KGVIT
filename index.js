@@ -17,6 +17,7 @@ import inquiryRouter from './routes/inquiry.js'
 import settingsRouter from './routes/settings.js'
 import leadsRouter from './routes/leads.js'
 import dashRouter from './routes/dashboard.js'
+import testimonialsRouter from './routes/testimonials.js'
 
 dotenv.config();
 
@@ -46,6 +47,7 @@ app.use('/api/v1/ir', inquiryRouter);
 app.use('/api/v1/sr', settingsRouter);
 app.use('/api/v1/lr', leadsRouter);
 app.use('/api/v1/dash', dashRouter);
+app.use('/api/v1/testimonials', testimonialsRouter);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);

@@ -376,6 +376,32 @@ model WebsiteSettings {
   updatedAt DateTime @updatedAt
 }
 
+model Testimonial {
+  id String @id @default(cuid())
+
+  name        String
+  designation String?
+
+  type TestimonialType @default(TEXT)
+
+  content String?   // rich text (quote)
+  videoUrl String?  // if type = VIDEO
+
+  imageUrl String?  // user image
+
+  order Int @default(0)
+
+  isPublished Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum TestimonialType {
+  TEXT
+  VIDEO
+}
+
 enum LeadStatus {
   PENDING
   REVIEWED
