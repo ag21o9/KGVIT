@@ -426,6 +426,61 @@ model FeedbackResponse {
   rating   RatingType
 }
 
+
+model AlumniFeedback {
+  id String @id @default(cuid())
+
+  name        String
+  email       String
+  mobile      String
+  degree      String
+  yearOfCompletion String
+  qualification String
+  designation String
+  organization String
+
+  academicAchievements     String
+  professionalAchievements String
+
+  higherStudiesDetails String?   // optional
+  competitiveExamDetails String?
+
+  willingForCorporateRelations Boolean?
+  proudAlumni Boolean?
+  attendMeet Boolean?
+  reason String?
+
+  responses AlumniFeedbackResponse[]
+
+  createdAt DateTime @default(now())
+}
+
+model AlumniFeedbackResponse {
+  id String @id @default(cuid())
+
+  feedbackId String
+  feedback   AlumniFeedback @relation(fields: [feedbackId], references: [id])
+
+  question AlumniQuestionType
+  rating   RatingType
+}
+
+enum AlumniQuestionType {
+  LEARNING_EXPERIENCE
+  SKILL_COURSES
+  CONTENT_RELEVANCE
+  COURSE_RELEVANCE_REAL_LIFE
+  INDUSTRIAL_VISIT
+  ACADEMIC_QUALITY
+  RESOURCES
+  INFRASTRUCTURE
+  CO_CURRICULAR
+  PLACEMENT_OPPORTUNITIES
+  COMMUNICATION
+  OVERALL_DEVELOPMENT
+  GRIEVANCE_HANDLING
+}
+
 enum QuestionType {
   // STUDENT SECTION
   COURSE_RELEVANCE
@@ -451,6 +506,7 @@ enum QuestionType {
   STUDENT_PARTICIPATION
   LIBRARY_PARENT
 }
+
 
 enum RatingType {
   EXCELLENT

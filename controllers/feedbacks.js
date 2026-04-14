@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 
-const STUDENT_CORNER_PERMISSION = "StudentCorner";
+const STUDENT_CORNER_PERMISSION = "Student Corner";
 
 const QUESTION_TYPES = [
     "COURSE_RELEVANCE",
@@ -28,6 +28,22 @@ const QUESTION_TYPES = [
 ];
 
 const RATING_TYPES = ["EXCELLENT", "VERY_GOOD", "GOOD", "AVERAGE", "SATISFACTORY"];
+
+const ALUMNI_QUESTION_TYPES = [
+    "LEARNING_EXPERIENCE",
+    "SKILL_COURSES",
+    "CONTENT_RELEVANCE",
+    "COURSE_RELEVANCE_REAL_LIFE",
+    "INDUSTRIAL_VISIT",
+    "ACADEMIC_QUALITY",
+    "RESOURCES",
+    "INFRASTRUCTURE",
+    "CO_CURRICULAR",
+    "PLACEMENT_OPPORTUNITIES",
+    "COMMUNICATION",
+    "OVERALL_DEVELOPMENT",
+    "GRIEVANCE_HANDLING",
+];
 
 const isNonEmptyString = (value) =>
     typeof value === "string" && value.trim().length > 0;
@@ -92,6 +108,198 @@ const validateCreateFeedbackBody = (body) => {
 };
 
 export const requiredPermission = STUDENT_CORNER_PERMISSION;
+
+const validateCreateAlumniFeedbackBody = (body) => {
+    const errors = [];
+
+    if (!isNonEmptyString(body.name)) {
+        errors.push("name is required");
+    }
+
+    if (!isNonEmptyString(body.email)) {
+        errors.push("email is required");
+    }
+
+    if (!isNonEmptyString(body.mobile)) {
+        errors.push("mobile is required");
+    }
+
+    if (!isNonEmptyString(body.degree)) {
+        errors.push("degree is required");
+    }
+
+    if (!isNonEmptyString(body.yearOfCompletion)) {
+        errors.push("yearOfCompletion is required");
+    }
+
+    if (!isNonEmptyString(body.qualification)) {
+        errors.push("qualification is required");
+    }
+
+    if (!isNonEmptyString(body.designation)) {
+        errors.push("designation is required");
+    }
+
+    if (!isNonEmptyString(body.organization)) {
+        errors.push("organization is required");
+    }
+
+    if (!isNonEmptyString(body.academicAchievements)) {
+        errors.push("academicAchievements is required");
+    }
+
+    if (!isNonEmptyString(body.professionalAchievements)) {
+        errors.push("professionalAchievements is required");
+    }
+
+    if (!Array.isArray(body.responses) || body.responses.length === 0) {
+        errors.push("responses must be a non-empty array");
+    } else {
+        body.responses.forEach((response, index) => {
+            if (!response || typeof response !== "object") {
+                errors.push(`responses[${index}] must be an object`);
+                return;
+            }
+
+            if (!ALUMNI_QUESTION_TYPES.includes(response.question)) {
+                errors.push(
+                    `responses[${index}].question must be one of: ${ALUMNI_QUESTION_TYPES.join(", ")}`
+                );
+            }
+
+            if (!RATING_TYPES.includes(response.rating)) {
+                errors.push(
+                    `responses[${index}].rating must be one of: ${RATING_TYPES.join(", ")}`
+                );
+            }
+        });
+    }
+
+    return errors;
+};
+
+export const createAlumniFeedback = async (req, res, next) => {
+    try {
+        const {
+            name,
+            email,
+            mobile,
+            degree,
+            yearOfCompletion,
+            qualification,
+            designation,
+            organization,
+            academicAchievements,
+            professionalAchievements,
+            higherStudiesDetails,
+            competitiveExamDetails,
+            willingForCorporateRelations,
+            proudAlumni,
+            attendMeet,
+            reason,
+            responses,
+        } = req.body;
+
+        const validationErrors = validateCreateAlumniFeedbackBody(req.body);
+        if (validationErrors.length > 0) {
+            return res.status(400).json(formatValidationErrors(validationErrors));
+        }
+
+        const feedback = await prisma.alumniFeedback.create({
+            data: {
+                name: name.trim(),
+                email: email.trim(),
+                mobile: mobile.trim(),
+                degree: degree.trim(),
+                yearOfCompletion: yearOfCompletion.trim(),
+                qualification: qualification.trim(),
+                designation: designation.trim(),
+                organization: organization.trim(),
+                academicAchievements: academicAchievements.trim(),
+                professionalAchievements: professionalAchievements.trim(),
+                higherStudiesDetails: higherStudiesDetails ? higherStudiesDetails.trim() : null,
+                competitiveExamDetails: competitiveExamDetails ? competitiveExamDetails.trim() : null,
+                willingForCorporateRelations: Boolean(willingForCorporateRelations),
+                proudAlumni: Boolean(proudAlumni),
+                attendMeet: Boolean(attendMeet),
+                reason: reason ? reason.trim() : null,
+                responses: {
+                    create: responses.map((response) => ({
+                        question: response.question,
+                        rating: response.rating,
+                    })),
+                },
+            },
+            include: {
+                responses: true,
+            },
+        });
+
+        return res.status(201).json({ success: true, data: feedback });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+};
+
+export const getAllAlumniFeedback = async (req, res, next) => {
+    try {
+        const feedbacks = await prisma.alumniFeedback.findMany({
+            orderBy: { createdAt: "desc" },
+            include: {
+                responses: true,
+            },
+        });
+
+        return res.json({ success: true, data: feedbacks });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getAlumniAnalytics = async (req, res, next) => {
+    try {
+        const [totalFeedback, responses] = await Promise.all([
+            prisma.alumniFeedback.count(),
+            prisma.alumniFeedbackResponse.findMany({
+                select: {
+                    question: true,
+                    rating: true,
+                },
+            }),
+        ]);
+
+        const ratingDistribution = RATING_TYPES.reduce((acc, rating) => {
+            acc[rating] = 0;
+            return acc;
+        }, {});
+
+        const questionWiseRatings = ALUMNI_QUESTION_TYPES.reduce((acc, question) => {
+            acc[question] = RATING_TYPES.reduce((ratingAcc, rating) => {
+                ratingAcc[rating] = 0;
+                return ratingAcc;
+            }, {});
+            return acc;
+        }, {});
+
+        responses.forEach((response) => {
+            ratingDistribution[response.rating] += 1;
+            questionWiseRatings[response.question][response.rating] += 1;
+        });
+
+        return res.json({
+            success: true,
+            data: {
+                totalFeedback,
+                totalResponses: responses.length,
+                ratingDistribution,
+                questionWiseRatings,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
 export const createFeedback = async (req, res, next) => {
     try {
