@@ -173,7 +173,8 @@ model Department {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  faculties Faculty[]
+  faculties        Faculty[]
+  studentFeedbacks StudentFeedback[]
 }
 
 model Faculty {
@@ -384,10 +385,10 @@ model Testimonial {
 
   type TestimonialType @default(TEXT)
 
-  content String?   // rich text (quote)
-  videoUrl String?  // if type = VIDEO
+  content  String? // rich text (quote)
+  videoUrl String? // if type = VIDEO
 
-  imageUrl String?  // user image
+  imageUrl String? // user image
 
   order Int @default(0)
 
@@ -395,6 +396,68 @@ model Testimonial {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model StudentFeedback {
+  id String @id @default(cuid())
+
+  studentName String
+  class       String
+  session     String
+  studentId   String
+
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  achievements String
+
+  responses FeedbackResponse[]
+
+  createdAt DateTime @default(now())
+}
+
+model FeedbackResponse {
+  id String @id @default(cuid())
+
+  feedbackId String
+  feedback   StudentFeedback @relation(fields: [feedbackId], references: [id])
+
+  question QuestionType
+  rating   RatingType
+}
+
+enum QuestionType {
+  // STUDENT SECTION
+  COURSE_RELEVANCE
+  LEARNING_VALUE
+  ACADEMIC_ACTIVITIES
+  CAMPUS_ENVIRONMENT
+  INFRASTRUCTURE
+  FACULTY_QUALITY
+  ADDON_COURSES
+  LIBRARY
+  GRIEVANCE_SYSTEM
+  SPORTS
+  PLACEMENT_SUPPORT
+  SAFE_ENVIRONMENT
+  COLLEGE_INFRA
+  DISCIPLINE
+  COMMUNICATION
+  COUNSELLING
+  REGULAR_CLASSES
+  ADMISSION_PROCESS
+  CO_CURRICULAR
+  ANTI_RAGGING
+  STUDENT_PARTICIPATION
+  LIBRARY_PARENT
+}
+
+enum RatingType {
+  EXCELLENT
+  VERY_GOOD
+  GOOD
+  AVERAGE
+  SATISFACTORY
 }
 
 enum TestimonialType {
