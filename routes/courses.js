@@ -15,6 +15,9 @@ import {
     updateCourseCategory,
     updateDepartment,
 } from "../controllers/courses.js";
+
+
+import { upload } from "../config/cloudinary.config.js";
 import { authMiddleware, checkPermission } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
@@ -30,8 +33,8 @@ router.post("/course-categories", createCourseCategory);
 router.put("/course-categories/:id", updateCourseCategory);
 router.delete("/course-categories/:id", deleteCourseCategory);
 
-router.post("/courses", createCourse);
-router.put("/courses/:id", updateCourse);
+router.post("/courses", upload.single("image"), createCourse);
+router.put("/courses/:id", upload.single("image"), updateCourse);
 router.delete("/courses/:id", deleteCourse);
 
 router.post("/departments", createDepartment);

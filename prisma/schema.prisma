@@ -149,7 +149,7 @@ model Course {
   fee      String? // "₹1,00,000"
 
   eligibility String? // rich text
-
+  image       String?
   attachments String? // links / notes
 
   isActive Boolean @default(true)

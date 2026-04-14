@@ -1,5 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 
+import { cloudinaryClient } from "../config/cloudinary.config.js";
+
 const COURSES_PERMISSION = "Courses Management";
 
 const slugify = (value) =>
@@ -9,6 +11,31 @@ const slugify = (value) =>
         .replace(/[^a-z0-9\s-]/g, "")
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-");
+
+
+const uploadImageBuffer = async (file, folder) => {
+    if (!file) return null;
+    if (!file.buffer) {
+        throw new Error("Upload buffer missing. Ensure multer uses memoryStorage.");
+    }
+
+    const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinaryClient.uploader.upload_stream(
+            {
+                folder,
+                resource_type: "image",
+            },
+            (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+            }
+        );
+
+        stream.end(file.buffer);
+    });
+
+    return uploadResult.secure_url;
+};
 
 const parseBoolean = (value, defaultValue = undefined) => {
     if (value === undefined || value === null || value === "") return defaultValue;
@@ -214,6 +241,8 @@ export const createCourse = async (req, res, next) => {
             });
         }
 
+        const uploadedLogo = await uploadImageBuffer(req.file, "courses");
+
         const finalSlug = slugify(slug || title);
         if (!finalSlug) {
             return res.status(400).json({ success: false, message: "Invalid slug" });
@@ -230,6 +259,7 @@ export const createCourse = async (req, res, next) => {
             data: {
                 title,
                 slug: finalSlug,
+                image: uploadedLogo,
                 description,
                 duration: duration ?? null,
                 fee: fee ?? null,
@@ -275,6 +305,9 @@ export const updateCourse = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "Course not found" });
         }
 
+
+        const uploadedLogo = await uploadImageBuffer(req.file, "courses");
+
         if (categoryId) {
             const category = await prisma.categoryCourse.findUnique({ where: { id: categoryId } });
             if (!category) {
@@ -287,6 +320,7 @@ export const updateCourse = async (req, res, next) => {
             data: {
                 title: title ?? undefined,
                 slug: slug ? slugify(slug) : undefined,
+                image: uploadedLogo || companyLogo || undefined,
                 description: description ?? undefined,
                 duration: duration ?? undefined,
                 fee: fee ?? undefined,

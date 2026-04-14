@@ -1,12 +1,12 @@
 import express from "express";
 import {
-	createFeedback,
-	getAllFeedback,
-	getFeedbackAnalytics,
-	createAlumniFeedback,
-	getAllAlumniFeedback,
-	getAlumniAnalytics,
-	requiredPermission,
+    createFeedback,
+    getAllFeedback,
+    getFeedbackAnalytics,
+    createAlumniFeedback,
+    getAllAlumniFeedback,
+    getAlumniAnalytics,
+    requiredPermission,
 } from "../controllers/feedbacks.js";
 import { authMiddleware, checkPermission } from "../middlewares/authMiddleware.js";
 
@@ -19,10 +19,10 @@ router.post("/feedback", createFeedback);
 router.get("/feedback", authMiddleware, checkPermission(requiredPermission), getAllFeedback);
 
 router.get(
-	"/feedback/analytics",
-	authMiddleware,
-	checkPermission(requiredPermission),
-	getFeedbackAnalytics
+    "/feedback/analytics",
+    authMiddleware,
+    checkPermission(requiredPermission),
+    getFeedbackAnalytics
 );
 
 // ALUMNI FEEDBACK - PUBLIC
@@ -30,17 +30,17 @@ router.post("/alumni-feedback", createAlumniFeedback);
 
 // ALUMNI FEEDBACK - ADMIN
 router.get(
-	"/alumni-feedback",
-	authMiddleware,
-	checkPermission(requiredPermission),
-	getAllAlumniFeedback
+    "/alumni-feedback",
+    authMiddleware,
+    checkPermission(requiredPermission),
+    getAllAlumniFeedback
 );
 
 router.get(
-	"/alumni-feedback/analytics",
-	authMiddleware,
-	checkPermission(requiredPermission),
-	getAlumniAnalytics
+    "/alumni-feedback/analytics",
+    authMiddleware,
+    checkPermission(requiredPermission),
+    getAlumniAnalytics
 );
 
 export default router;
